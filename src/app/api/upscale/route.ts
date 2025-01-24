@@ -3,6 +3,7 @@ import Replicate from 'replicate';
 import sharp from 'sharp';
 import { logError } from '@/lib/errorLogger';
 import 'server-only';
+import rateLimit from 'express-rate-limit';
 
 sharp.cache(false); // Disable filesystem caching
 
@@ -28,7 +29,12 @@ type ImageMetadata = {
   height: number;
 };
 
-// Modified processImage with type safety
+/**
+ * Processes image through AI upscaler and resizer
+ * @param {string} base64Image - Input image in base64
+ * @returns {Promise<string>} Processed image in base64
+ * @throws {Error} If processing fails
+ */
 const processImage = async (base64Image: string): Promise<string> => {
   try {
     const upscaled = await upscale(base64Image, 2);
@@ -129,9 +135,21 @@ async function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-// Enhanced POST handler
+// Add rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+/**
+ * Main API endpoint handler
+ * @method POST
+ * @param {NextRequest} request - Incoming request with images
+ * @returns {NextResponse} JSON response with results
+ */
 export async function POST(request: NextRequest) {
   try {
+    await limiter.check(5, 'CACHE_TOKEN'); // 5 requests per minute
     const { images }: { images: unknown[] } = await request.json();
     
     if (!Array.isArray(images)) {

@@ -1,42 +1,33 @@
-# Image Upscaler
+# AI Image Upscaler
 
-Professional image upscaling tool optimized for real estate and hospitality photography. Achieves 4K resolution while preserving natural details and textures.
+Professional image upscaling solution for real estate photography with quality validation.
 
 ## Features
+- 2x AI Upscaling using Real-ESRGAN
+- Automated resizing to 4000x3000
+- Batch processing with progress tracking
+- Quality scoring system (1-10)
+- Secure API endpoints with rate limiting
 
-- **AI-Powered Upscaling**: 2x upscale using Real-ESRGAN model
-- **Smart Resizing**: Outputs optimized 4000x3000 images
-- **Quality Metrics**: Automatic quality scoring system
-- **Batch Processing**: Handle multiple images simultaneously
-- **Error Handling**: Robust validation and error recovery
+## Tech Stack
+- Next.js 14
+- Replicate API
+- Sharp (Image Processing)
+- TypeScript
+- Tailwind CSS
 
-## Technical Specs
+## Setup
 
-- **Upscale Model**: Real-ESRGAN with custom parameters:
-  ```javascript
-  {
-    face_enhance: false,
-    tile: 512,
-    tile_pad: 32,
-    gfpgan_visibility: 0,
-    realesrgan_strength: 0.8
-  }
-  ```
-- **Resize Method**: Lanczos3 algorithm
-- **Max Input Size**: 8000x8000 pixels
-- **Output Format**: PNG with lossless compression
-
-## Requirements
-
+### Requirements
 - Node.js 18+
-- Replicate API Key
-- 4GB+ VRAM recommended
+- Replicate API Token
+- 4GB+ VRAM GPU recommended
 
-## Installation
-
-1. Clone repository:
+### Installation
+1. Clone repo:
    ```bash
-   git clone https://github.com/your-repo/image-upscaler.git
+   git clone https://github.com/kesjam/image-upscaler-resize.git
+   cd image-upscaler-resize
    ```
 2. Install dependencies:
    ```bash
@@ -47,25 +38,27 @@ Professional image upscaling tool optimized for real estate and hospitality phot
    REPLICATE_API_TOKEN=your_api_key_here
    ```
 
-## Usage
-
-1. Drag & drop images into the upload zone
-2. Click "Upscale Images"
-3. Monitor progress and quality scores
-4. Download ZIP archive of processed images
-
-## Development
-
+### Running
 ```bash
 npm run dev
 ```
 
-## Build
-
+### Production Build
 ```bash
 npm run build && npm start
 ```
 
-## License
+## Usage
+1. Drag & drop images into the upload zone
+2. Click "Upscale Images"
+3. View quality scores and compare results
+4. Download ZIP archive of processed images
 
-MIT License - See [LICENSE](LICENSE) for details
+## API Documentation
+`POST /api/upscale`
+- Accepts: JSON array of base64 images
+- Returns: Processed images with metadata
+- Rate Limit: 5 requests/minute
+
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.

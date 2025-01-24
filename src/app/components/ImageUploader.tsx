@@ -50,6 +50,12 @@ const MemoizedCompareSlider = React.memo(({ original, upscaled }: { original: st
   />
 ));
 
+/**
+ * Main image processing component handling upload, upscaling, and display
+ * @component
+ * @example
+ * <ImageUploader />
+ */
 const ImageUploader = () => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -60,6 +66,11 @@ const ImageUploader = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [processingStages, setProcessingStages] = useState<ProcessingStage[]>([]);
 
+  /**
+   * Validates image against minimum requirements
+   * @param {File} file - Image file to validate
+   * @throws {Error} If image doesn't meet requirements
+   */
   const validateImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -116,6 +127,11 @@ const ImageUploader = () => {
     }
   });
 
+  /**
+   * Converts File to base64 string
+   * @param {File} file - Image file to convert
+   * @returns {Promise<string>} Base64 encoded image
+   */
   const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -141,6 +157,8 @@ const ImageUploader = () => {
     });
   };
 
+  const worker = new Worker(new URL('../../workers/image.worker.ts', import.meta.url));
+
   const handleUpscale = async () => {
     if (!images.length) return;
 
@@ -154,17 +172,11 @@ const ImageUploader = () => {
         images.map(file => readFileAsBase64(file))
       );
 
-      const response = await fetch('/api/upscale', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: imageBase64List }),
-      });
+      worker.postMessage({ images: imageBase64List });
+      worker.onmessage = (event) => {
+        // Handle processed images
+      };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const { results } = await response.json();
       const processedImages: ProcessedImage[] = [];
 
       for (const [index, result] of results.entries()) {
