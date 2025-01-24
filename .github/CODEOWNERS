@@ -1,0 +1,14 @@
+# Core components
+/src/app/components/ImageUploader.tsx @kesjam
+/src/app/api/upscale/route.ts @kesjam
+
+# Configuration files
+package.json @kesjam
+next.config.js @kesjam
+
+# Documentation
+README.md @kesjam
+
+# Security-related files
+.env*.local @kesjam
+.github/ @kesjam 
