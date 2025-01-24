@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+.flex::-webkit-scrollbar {
+  height: 8px;
+}
+
+.flex::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.flex::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.flex::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.flex {
+  scroll-snap-type: x mandatory;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+} 
