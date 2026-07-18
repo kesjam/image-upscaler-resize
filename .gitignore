@@ -45,10 +45,18 @@ coverage/
 # Local development
 .DS_Store
 *.pem
+*.key
+*.p12
+*.pfx
+*.crt
+.aws/
+.ssh/
 
 # Secret files
 secrets/
 keys/
+private-data/
+exports/private/
 
 # Sharp cache
 sharp-cache/
@@ -83,4 +91,4 @@ yarn.lock
 !.yarn/versions
 
 # Local Netlify folder
-.netlify 
+.netlify
