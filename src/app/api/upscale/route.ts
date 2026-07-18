@@ -2,34 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import Replicate from 'replicate';
 import sharp from 'sharp';
 import { logError } from '@/lib/errorLogger';
+import { createRateLimiter } from '@/lib/rateLimit';
 import 'server-only';
 
 sharp.cache(false); // Disable filesystem caching
 
 export const dynamic = 'force-dynamic'; // Prevent static optimization
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 5;
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+const checkClientRateLimit = createRateLimiter({
+  windowMs: 60_000,
+  maxRequests: 5,
+});
 
 const checkRateLimit = (request: NextRequest): boolean => {
   const now = Date.now();
   const clientId = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || request.headers.get('x-real-ip')
     || 'anonymous';
-  const current = rateLimitStore.get(clientId);
-
-  if (!current || current.resetAt <= now) {
-    rateLimitStore.set(clientId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-
-  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return false;
-  }
-
-  current.count += 1;
-  return true;
+  return checkClientRateLimit(clientId, now);
 };
 
 const createReplicateClient = () => {
