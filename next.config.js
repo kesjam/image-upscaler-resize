@@ -16,9 +16,7 @@ const nextConfig = {
     }
     return config;
   },
-  experimental: {
-    serverComponentsExternalPackages: ['sharp']
-  }
+  serverExternalPackages: ['sharp']
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

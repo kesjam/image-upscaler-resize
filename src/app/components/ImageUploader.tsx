@@ -26,6 +26,11 @@ type ProcessingStage = {
   progress?: number;
 };
 
+type ProcessResult = {
+  data?: string;
+  error?: string;
+};
+
 const MemoizedCompareSlider = React.memo(({ original, upscaled }: { original: string, upscaled: string }) => (
   <ReactCompareSlider
     itemOne={
@@ -49,6 +54,7 @@ const MemoizedCompareSlider = React.memo(({ original, upscaled }: { original: st
     style={{ height: '400px' }}
   />
 ));
+MemoizedCompareSlider.displayName = 'MemoizedCompareSlider';
 
 /**
  * Main image processing component handling upload, upscaling, and display
@@ -96,7 +102,11 @@ const ImageUploader = () => {
         }
 
         URL.revokeObjectURL(img.src);
-        errors.length ? reject(errors.join(', ')) : resolve('');
+        if (errors.length) {
+          reject(errors.join(', '));
+        } else {
+          resolve('');
+        }
       };
 
       img.onerror = () => reject('Invalid image file');
@@ -157,8 +167,6 @@ const ImageUploader = () => {
     });
   };
 
-  const worker = new Worker(new URL('../../workers/image.worker.ts', import.meta.url));
-
   const handleUpscale = async () => {
     if (!images.length) return;
 
@@ -172,16 +180,29 @@ const ImageUploader = () => {
         images.map(file => readFileAsBase64(file))
       );
 
-      worker.postMessage({ images: imageBase64List });
-      worker.onmessage = (event) => {
-        // Handle processed images
+      const response = await fetch('/api/upscale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: imageBase64List })
+      });
+
+      const payload = await response.json() as {
+        results?: ProcessResult[];
+        error?: string;
       };
+
+      if (!response.ok || !payload.results) {
+        throw new Error(payload.error || 'Image processing failed');
+      }
+
+      const results = payload.results;
 
       const processedImages: ProcessedImage[] = [];
 
-      for (const [index, result] of results.entries()) {
-        if (result.error) {
-          setErrors(prev => [...prev, `Image ${index + 1}: ${result.error}`]);
+      for (let index = 0; index < results.length; index += 1) {
+        const result = results[index];
+        if (result.error || !result.data) {
+          setErrors(prev => [...prev, `Image ${index + 1}: ${result.error || 'No image returned'}`]);
           continue;
         }
 
@@ -260,7 +281,7 @@ const ImageUploader = () => {
           <ul className="list-disc pl-5 text-sm text-gray-600">
             <li>Minimum 2048x1080 pixels (ideal 4000x3000)</li>
             <li>Landscape orientation (horizontal)</li>
-            <li>Show property's best features</li>
+            <li>Show property&apos;s best features</li>
             <li>Clear and well-lit composition</li>
           </ul>
         </div>
